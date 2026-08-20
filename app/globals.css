@@ -23,6 +23,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-severity-critical: var(--severity-critical);
+  --color-severity-high: var(--severity-high);
+  --color-severity-medium: var(--severity-medium);
+  --color-severity-low: var(--severity-low);
+  --color-severity-info: var(--severity-info);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -48,73 +53,93 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * AEGIS console palette: near-black ground, cyan instrumentation, and
+ * severity colours that stay distinguishable side by side on dark.
+ * The console is dark-only by design, so .dark repeats these values and
+ * no light theme is defined.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(0.16 0.012 240);
+  --foreground: oklch(0.9 0.02 195);
+
+  --card: oklch(0.19 0.014 240);
+  --card-foreground: oklch(0.9 0.02 195);
+  --popover: oklch(0.2 0.014 240);
+  --popover-foreground: oklch(0.9 0.02 195);
+
+  --primary: oklch(0.78 0.14 195);
+  --primary-foreground: oklch(0.16 0.012 240);
+
+  --secondary: oklch(0.26 0.016 240);
+  --secondary-foreground: oklch(0.88 0.02 195);
+
+  --muted: oklch(0.24 0.014 240);
+  --muted-foreground: oklch(0.62 0.025 210);
+
+  --accent: oklch(0.28 0.03 200);
+  --accent-foreground: oklch(0.92 0.03 195);
+
+  --destructive: oklch(0.62 0.22 22);
+
+  --border: oklch(0.32 0.02 220 / 55%);
+  --input: oklch(0.34 0.02 220 / 60%);
+  --ring: oklch(0.7 0.13 195);
+
+  /* Severity scale, used by badges, rows, charts and the activity graph. */
+  --severity-critical: oklch(0.62 0.22 22);
+  --severity-high: oklch(0.7 0.17 45);
+  --severity-medium: oklch(0.79 0.14 85);
+  --severity-low: oklch(0.62 0.03 220);
+  --severity-info: oklch(0.68 0.1 210);
+
+  --chart-1: var(--severity-critical);
+  --chart-2: var(--severity-high);
+  --chart-3: var(--severity-medium);
+  --chart-4: oklch(0.72 0.12 195);
+  --chart-5: oklch(0.55 0.09 260);
+
+  --sidebar: oklch(0.14 0.012 240);
+  --sidebar-foreground: oklch(0.82 0.02 200);
+  --sidebar-primary: oklch(0.78 0.14 195);
+  --sidebar-primary-foreground: oklch(0.14 0.012 240);
+  --sidebar-accent: oklch(0.25 0.03 200);
+  --sidebar-accent-foreground: oklch(0.93 0.03 195);
+  --sidebar-border: oklch(0.3 0.02 220 / 50%);
+  --sidebar-ring: oklch(0.7 0.13 195);
 }
 
+/*
+ * Dark is the only theme; kept in sync so a stray .dark class cannot
+ * produce a half-styled console.
+ */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.16 0.012 240);
+  --foreground: oklch(0.9 0.02 195);
+  --card: oklch(0.19 0.014 240);
+  --card-foreground: oklch(0.9 0.02 195);
+  --popover: oklch(0.2 0.014 240);
+  --popover-foreground: oklch(0.9 0.02 195);
+  --primary: oklch(0.78 0.14 195);
+  --primary-foreground: oklch(0.16 0.012 240);
+  --secondary: oklch(0.26 0.016 240);
+  --secondary-foreground: oklch(0.88 0.02 195);
+  --muted: oklch(0.24 0.014 240);
+  --muted-foreground: oklch(0.62 0.025 210);
+  --accent: oklch(0.28 0.03 200);
+  --accent-foreground: oklch(0.92 0.03 195);
+  --destructive: oklch(0.62 0.22 22);
+  --border: oklch(0.32 0.02 220 / 55%);
+  --input: oklch(0.34 0.02 220 / 60%);
+  --ring: oklch(0.7 0.13 195);
+  --sidebar: oklch(0.14 0.012 240);
+  --sidebar-foreground: oklch(0.82 0.02 200);
+  --sidebar-primary: oklch(0.78 0.14 195);
+  --sidebar-primary-foreground: oklch(0.14 0.012 240);
+  --sidebar-accent: oklch(0.25 0.03 200);
+  --sidebar-accent-foreground: oklch(0.93 0.03 195);
+  --sidebar-border: oklch(0.3 0.02 220 / 50%);
+  --sidebar-ring: oklch(0.7 0.13 195);
 }
 
 @layer base {
@@ -125,6 +150,11 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /*
+     * Monospace everywhere: analysts read hostnames, IPs and hashes far
+     * more than prose, and column alignment matters more than warmth.
+     */
+    @apply font-mono;
+    color-scheme: dark;
   }
 }
