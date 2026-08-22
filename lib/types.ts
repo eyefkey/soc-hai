@@ -62,12 +62,31 @@ export type MitreTactic =
   | 'EXFILTRATION'
   | 'IMPACT';
 
+export type AssetType =
+  | 'SERVER'
+  | 'DATABASE'
+  | 'API'
+  | 'ENDPOINT'
+  | 'NETWORK_DEVICE'
+  | 'CLOUD'
+  | 'OTHER';
+
+export type AssetStatus =
+  | 'ACTIVE'
+  | 'INACTIVE'
+  | 'COMPROMISED'
+  | 'QUARANTINED'
+  | 'DECOMMISSIONED';
+
 export type Asset = {
   id: string;
   name: string;
+  type: AssetType;
   hostname: string | null;
   ipAddress: string | null;
-  status: 'ACTIVE' | 'INACTIVE' | 'COMPROMISED' | 'QUARANTINED' | 'DECOMMISSIONED';
+  status: AssetStatus;
+  description?: string | null;
+  createdAt?: string;
 };
 
 export type Incident = {
@@ -248,3 +267,30 @@ export function nextSeverity(severity: Severity): Severity | null {
   const ladder: Severity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
   return ladder[ladder.indexOf(severity) + 1] ?? null;
 }
+
+export type AuditAction =
+  | 'CREATED'
+  | 'UPDATED'
+  | 'DELETED'
+  | 'ATTACHED'
+  | 'DETACHED'
+  | 'VIEWED'
+  | 'UPLOADED'
+  | 'DOWNLOADED'
+  | 'STATUS_CHANGED';
+
+export type AuditEntity = 'INCIDENT' | 'ALERT' | 'ASSET' | 'EVIDENCE' | 'USER' | 'INVESTIGATION' | 'FINDING';
+
+export type AuditLogEntry = {
+  id: string;
+  action: AuditAction;
+  entity: AuditEntity;
+  entityId: string | null;
+  userId: string | null;
+  username: string | null;
+  description: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
