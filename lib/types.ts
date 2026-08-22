@@ -143,3 +143,108 @@ export function age(since: string, now: number = Date.now()): string {
 
   return [hours, minutes, secs].map((n) => String(n).padStart(2, '0')).join(':');
 }
+
+export type Alert = {
+  id: string;
+  title: string;
+  description: string | null;
+  severity: Severity;
+  source: string | null;
+  sourceIp: string | null;
+  targetIp: string | null;
+  tactic: MitreTactic | null;
+  affectedUser: string | null;
+  createdAt: string;
+  incidentId: string | null;
+};
+
+export type Evidence = {
+  id: string;
+  type: string;
+  value: string;
+  description: string | null;
+  createdAt: string;
+};
+
+export type Investigation = {
+  id: string;
+  incidentId: string;
+  status: 'OPEN' | 'INVESTIGATING' | 'CONTAINED' | 'RESOLVED' | 'CLOSED';
+  assignedTo: string | null;
+  startedAt: string;
+  completedAt: string | null;
+  conclusion: string | null;
+};
+
+export type IncidentDetail = Incident & {
+  alerts: Alert[];
+  evidence: Evidence[];
+  investigation: Investigation | null;
+};
+
+export type InvestigationEvent = {
+  id: string;
+  timestamp: string;
+  type: 'INCIDENT' | 'ALERT' | 'EVIDENCE' | 'ASSET' | 'AUDIT';
+  action: string;
+  sourceId: string;
+  description: string;
+  severity?: Severity;
+  metadata?: Record<string, unknown>;
+};
+
+export type RiskFactor = {
+  name: string;
+  points: number;
+  reason: string;
+};
+
+export type RiskScore = {
+  investigationId: string;
+  score: number;
+  level: Severity;
+  factors: RiskFactor[];
+};
+
+export type Correlation = {
+  type:
+    | 'ALERT_ASSET'
+    | 'ALERT_EVIDENCE'
+    | 'EVIDENCE_ASSET'
+    | 'INVESTIGATION_FINDING';
+  sourceId: string;
+  targetId: string;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  reason: string;
+};
+
+export type CorrelationResult = {
+  investigationId: string;
+  incidentId: string;
+  risk: RiskScore;
+  correlations: Correlation[];
+};
+
+export type Explanation = {
+  investigationId: string;
+  risk: { score: number; level: Severity };
+  explanation: { summary: string; factors: string[] };
+};
+
+export type Finding = {
+  id: string;
+  title: string;
+  description: string;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  impact: string | null;
+  recommendation: string | null;
+  createdAt: string;
+};
+
+/*
+ * The next severity up, for escalation. CRITICAL has nowhere to go.
+ */
+export function nextSeverity(severity: Severity): Severity | null {
+  const ladder: Severity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  return ladder[ladder.indexOf(severity) + 1] ?? null;
+}
