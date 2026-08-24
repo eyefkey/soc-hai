@@ -1,10 +1,17 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 import { api, ApiError } from '@/lib/api';
 import { requireUser } from '@/lib/dal';
-import { nextSeverity, type Incident, type Investigation } from '@/lib/types';
+import {
+  nextSeverity,
+  type Incident,
+  type Investigation,
+  type MitreTactic,
+  type Severity,
+} from '@/lib/types';
 
 export type ActionResult = { error?: string };
 
@@ -27,6 +34,59 @@ function toActionResult(error: unknown): ActionResult {
   }
 
   return { error: 'Could not reach the SOC API.' };
+}
+
+export type CreateIncidentState = ActionResult;
+
+/*
+ * useActionState's contract is (previousState, formData) => nextState, so
+ * this cannot return void or throw a plain error the way a button handler
+ * would — every path has to resolve to a CreateIncidentState the form can
+ * render.
+ */
+export async function createIncident(
+  _previous: CreateIncidentState,
+  formData: FormData,
+): Promise<CreateIncidentState> {
+  const title = String(formData.get('title') ?? '').trim();
+  const description = String(formData.get('description') ?? '').trim();
+  const severity = formData.get('severity');
+  const tactic = formData.get('tactic');
+
+  if (!title) {
+    return { error: 'Title is required.' };
+  }
+
+  if (typeof severity !== 'string' || !severity) {
+    return { error: 'Severity is required.' };
+  }
+
+  let incident: Incident;
+
+  try {
+    incident = await api<Incident>('/incidents', {
+      method: 'POST',
+      body: {
+        title,
+        severity: severity as Severity,
+        ...(description ? { description } : {}),
+        ...(typeof tactic === 'string' && tactic
+          ? { tactic: tactic as MitreTactic }
+          : {}),
+      },
+    });
+  } catch (error) {
+    return toActionResult(error);
+  }
+
+  revalidatePath('/incidents');
+  revalidatePath('/dashboard');
+
+  /*
+   * redirect() throws to unwind the action, so it has to sit outside the
+   * try block above or it would be caught and reported as a failure.
+   */
+  redirect(`/incidents/${incident.id}`);
 }
 
 export async function escalateIncident(
