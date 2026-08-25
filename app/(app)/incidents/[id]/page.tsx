@@ -4,6 +4,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 
 import { ActivityChart } from '@/components/activity-chart';
 import { AssetLinkSection } from '@/components/asset-link-section';
+import { AssignmentEditor } from '@/components/assignment-editor';
 import { AutomatedAnalysis } from '@/components/automated-analysis';
 import { Button } from '@/components/ui/button';
 import { ConclusionSection } from '@/components/conclusion-section';
@@ -219,7 +220,16 @@ export default async function IncidentDetailPage({
           <div className="flex gap-1.5">
             <dt>Assigned</dt>
             <dd className="text-foreground normal-case">
-              {incident.investigation?.assignedTo ?? 'Unassigned'}
+              {investigationId ? (
+                <AssignmentEditor
+                  investigationId={investigationId}
+                  incidentId={incident.id}
+                  assignedTo={incident.investigation?.assignedTo ?? null}
+                  canWrite={canWrite}
+                />
+              ) : (
+                'Unassigned'
+              )}
             </dd>
           </div>
         </dl>

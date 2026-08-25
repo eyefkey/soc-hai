@@ -182,6 +182,40 @@ export async function saveConclusion(
 }
 
 /*
+ * assignedTo is a free string on the backend, not a foreign key to a user
+ * account — it accepts an external responder's name just as well as a
+ * registered analyst's username. A text field matches that model more
+ * honestly than a picker would, and a picker would need the ADMIN-only
+ * user list besides, which would leave an ANALYST unable to reassign a
+ * case at all.
+ */
+export async function reassignInvestigation(
+  investigationId: string,
+  incidentId: string,
+  _previous: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const assignedTo = String(formData.get('assignedTo') ?? '').trim();
+
+  if (!assignedTo) {
+    return { error: 'Enter who this investigation is assigned to.' };
+  }
+
+  try {
+    await api(`/investigations/${investigationId}`, {
+      method: 'PATCH',
+      body: { assignedTo },
+    });
+  } catch (error) {
+    return toActionResult(error);
+  }
+
+  revalidatePath(`/incidents/${incidentId}`);
+  revalidatePath('/dashboard');
+  return {};
+}
+
+/*
  * Closes the incident and, if an investigation is attached, resolves it
  * too — an incident and an orphaned open investigation would disagree
  * about whether the case is still active.
