@@ -73,7 +73,11 @@ export default async function AssetsPage({
         </div>
       </header>
 
-      <AssetTable assets={assets.data} canDelete={hasRole(user, 'ADMIN')} />
+      <AssetTable
+        assets={assets.data}
+        canWrite={hasRole(user, 'ANALYST')}
+        canDelete={hasRole(user, 'ADMIN')}
+      />
 
       <Pagination
         total={assets.meta.total}

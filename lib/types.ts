@@ -86,6 +86,9 @@ export type Asset = {
   ipAddress: string | null;
   status: AssetStatus;
   description?: string | null;
+  monitoredUrl?: string | null;
+  checkThreshold?: number | null;
+  checkSeverity?: Severity | null;
   createdAt?: string;
 };
 

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { api, ApiError } from '@/lib/api';
-import type { Asset, AssetStatus, AssetType } from '@/lib/types';
+import type { Asset, AssetStatus, AssetType, Severity } from '@/lib/types';
 
 export type ActionResult = { error?: string };
 
@@ -32,6 +32,9 @@ export async function createAsset(
   const hostname = String(formData.get('hostname') ?? '').trim();
   const ipAddress = String(formData.get('ipAddress') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
+  const monitoredUrl = String(formData.get('monitoredUrl') ?? '').trim();
+  const checkThreshold = String(formData.get('checkThreshold') ?? '').trim();
+  const checkSeverity = formData.get('checkSeverity');
 
   if (!name) {
     return { error: 'Name is required.' };
@@ -53,6 +56,11 @@ export async function createAsset(
         ...(hostname ? { hostname } : {}),
         ...(ipAddress ? { ipAddress } : {}),
         ...(description ? { description } : {}),
+        ...(monitoredUrl ? { monitoredUrl } : {}),
+        ...(checkThreshold ? { checkThreshold: Number(checkThreshold) } : {}),
+        ...(typeof checkSeverity === 'string' && checkSeverity
+          ? { checkSeverity: checkSeverity as Severity }
+          : {}),
       },
     });
   } catch (error) {
@@ -61,6 +69,31 @@ export async function createAsset(
 
   revalidatePath('/assets');
   redirect('/assets');
+}
+
+/*
+ * assetId is bound ahead of time (updateMonitoredUrl.bind(null, asset.id)),
+ * leaving a (state, formData) shape for useActionState — same pattern as
+ * AssignmentEditor's reassignInvestigation.
+ */
+export async function updateMonitoredUrl(
+  assetId: string,
+  _previous: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const monitoredUrl = String(formData.get('monitoredUrl') ?? '').trim();
+
+  try {
+    await api(`/assets/${assetId}`, {
+      method: 'PATCH',
+      body: { monitoredUrl: monitoredUrl || null },
+    });
+  } catch (error) {
+    return toActionResult(error);
+  }
+
+  revalidatePath('/assets');
+  return {};
 }
 
 /*

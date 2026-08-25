@@ -1,5 +1,6 @@
 import { deleteAsset } from '@/app/actions/assets';
 import { DeleteButton } from '@/components/delete-button';
+import { MonitoredUrlEditor } from '@/components/monitored-url-editor';
 import { cn } from '@/lib/utils';
 import type { Asset, AssetStatus } from '@/lib/types';
 
@@ -28,9 +29,11 @@ function AssetStatusBadge({ status }: { status: AssetStatus }) {
 
 export function AssetTable({
   assets,
+  canWrite = false,
   canDelete = false,
 }: {
   assets: Asset[];
+  canWrite?: boolean;
   canDelete?: boolean;
 }) {
   if (assets.length === 0) {
@@ -49,6 +52,7 @@ export function AssetTable({
           <th className="px-2 py-2 text-left font-normal">Asset</th>
           <th className="w-32 px-2 py-2 text-left font-normal">Type</th>
           <th className="w-40 px-4 py-2 text-right font-normal">IP address</th>
+          <th className="w-64 px-4 py-2 text-left font-normal">Monitored URL</th>
           {canDelete ? <th className="w-20 px-2 py-2" /> : null}
         </tr>
       </thead>
@@ -75,6 +79,14 @@ export function AssetTable({
 
             <td className="text-muted-foreground px-4 py-2.5 text-right align-top text-[11px] tabular-nums">
               {asset.ipAddress ?? '—'}
+            </td>
+
+            <td className="px-4 py-2.5 align-top text-[11px]">
+              <MonitoredUrlEditor
+                assetId={asset.id}
+                monitoredUrl={asset.monitoredUrl}
+                canWrite={canWrite}
+              />
             </td>
 
             {canDelete ? (

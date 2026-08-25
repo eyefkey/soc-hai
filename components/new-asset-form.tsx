@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioPills } from '@/components/radio-pills';
-import type { AssetStatus, AssetType } from '@/lib/types';
+import type { AssetStatus, AssetType, Severity } from '@/lib/types';
 
 const TYPES: AssetType[] = [
   'SERVER',
@@ -28,6 +28,8 @@ const STATUSES: AssetStatus[] = [
   'QUARANTINED',
   'DECOMMISSIONED',
 ];
+
+const SEVERITIES: Severity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
 const initialState: CreateAssetState = {};
 
@@ -66,6 +68,52 @@ export function NewAssetForm() {
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Input id="description" name="description" disabled={pending} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="monitoredUrl">
+          Monitored URL{' '}
+          <span className="text-muted-foreground font-normal normal-case">
+            (optional — the uptime checker polls this and opens an incident
+            here on outage)
+          </span>
+        </Label>
+        <Input
+          id="monitoredUrl"
+          name="monitoredUrl"
+          type="url"
+          placeholder="https://example.com"
+          disabled={pending}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="checkThreshold">
+            Failures before incident{' '}
+            <span className="text-muted-foreground font-normal normal-case">
+              (optional — defaults to the checker&apos;s own setting)
+            </span>
+          </Label>
+          <Input
+            id="checkThreshold"
+            name="checkThreshold"
+            type="number"
+            min={1}
+            placeholder="3"
+            disabled={pending}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>
+            Incident severity{' '}
+            <span className="text-muted-foreground font-normal normal-case">
+              (optional — defaults to HIGH)
+            </span>
+          </Label>
+          <RadioPills name="checkSeverity" options={SEVERITIES} />
+        </div>
       </div>
 
       <div className="space-y-2">
