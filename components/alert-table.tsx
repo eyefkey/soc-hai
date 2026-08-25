@@ -1,11 +1,19 @@
 import Link from 'next/link';
 
+import { deleteAlert } from '@/app/actions/alerts';
+import { DeleteButton } from '@/components/delete-button';
 import { SeverityBadge } from '@/components/severity-badge';
 import { incidentRef, tacticLabel, type Alert, type Incident } from '@/lib/types';
 
 type AlertRow = Alert & { incident: Incident | null };
 
-export function AlertTable({ alerts }: { alerts: AlertRow[] }) {
+export function AlertTable({
+  alerts,
+  canDelete = false,
+}: {
+  alerts: AlertRow[];
+  canDelete?: boolean;
+}) {
   if (alerts.length === 0) {
     return (
       <div className="text-muted-foreground px-4 py-10 text-center text-sm">
@@ -22,6 +30,7 @@ export function AlertTable({ alerts }: { alerts: AlertRow[] }) {
           <th className="px-2 py-2 text-left font-normal">Alert</th>
           <th className="w-36 px-2 py-2 text-left font-normal">Incident</th>
           <th className="w-44 px-4 py-2 text-right font-normal">Detected</th>
+          {canDelete ? <th className="w-20 px-2 py-2" /> : null}
         </tr>
       </thead>
 
@@ -59,6 +68,12 @@ export function AlertTable({ alerts }: { alerts: AlertRow[] }) {
             <td className="text-muted-foreground px-4 py-2.5 text-right align-top text-[11px] tabular-nums">
               {new Date(alert.createdAt).toLocaleString()}
             </td>
+
+            {canDelete ? (
+              <td className="px-2 py-2.5 text-right align-top">
+                <DeleteButton action={deleteAlert.bind(null, alert.id)} />
+              </td>
+            ) : null}
           </tr>
         ))}
       </tbody>

@@ -177,9 +177,19 @@ export type Alert = {
   incidentId: string | null;
 };
 
+export type EvidenceType =
+  | 'IP_ADDRESS'
+  | 'DOMAIN'
+  | 'URL'
+  | 'FILE_HASH'
+  | 'LOG'
+  | 'SCREENSHOT'
+  | 'FILE'
+  | 'OTHER';
+
 export type Evidence = {
   id: string;
-  type: string;
+  type: EvidenceType;
   value: string;
   description: string | null;
   createdAt: string;

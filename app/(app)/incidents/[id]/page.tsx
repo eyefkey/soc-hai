@@ -1,22 +1,30 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 
 import { ActivityChart } from '@/components/activity-chart';
+import { AssetLinkSection } from '@/components/asset-link-section';
 import { AutomatedAnalysis } from '@/components/automated-analysis';
+import { Button } from '@/components/ui/button';
+import { EvidenceSection } from '@/components/evidence-section';
 import { EventTimeline } from '@/components/event-timeline';
+import { FindingsSection } from '@/components/findings-section';
 import { IncidentActions } from '@/components/incident-actions';
 import { SeverityBadge, StatusBadge } from '@/components/severity-badge';
 import { api, ApiError } from '@/lib/api';
 import { requireUser } from '@/lib/dal';
 import {
+  hasRole,
   incidentRef,
   tacticLabel,
   type ActivityBucket,
+  type Asset,
   type CorrelationResult,
   type Explanation,
+  type Finding,
   type IncidentDetail,
   type InvestigationEvent,
+  type Paginated,
   type Severity,
 } from '@/lib/types';
 
@@ -119,17 +127,44 @@ export default async function IncidentDetailPage({
 
   const investigationId = incident.investigation?.id;
 
-  const [events, correlation, explanation] = investigationId
-    ? await Promise.all([
-        api<InvestigationEvent[]>(`/investigations/${investigationId}/events`),
-        api<CorrelationResult>(`/investigations/${investigationId}/correlations`),
-        api<Explanation>(`/investigations/${investigationId}/explanation`),
-      ])
-    : [null, null, null];
+  const [events, correlation, explanation, findings, allAssets] =
+    await Promise.all([
+      investigationId
+        ? api<InvestigationEvent[]>(`/investigations/${investigationId}/events`)
+        : Promise.resolve(null),
+      investigationId
+        ? api<CorrelationResult>(
+            `/investigations/${investigationId}/correlations`,
+          )
+        : Promise.resolve(null),
+      investigationId
+        ? api<Explanation>(`/investigations/${investigationId}/explanation`)
+        : Promise.resolve(null),
+      investigationId
+        ? api<Finding[]>(`/investigations/${investigationId}/findings`)
+        : Promise.resolve(null),
+      /*
+       * The attach picker needs the full catalogue to offer, capped well
+       * above what any real deployment is likely to have while it stays
+       * unpaginated here.
+       */
+      api<Paginated<Asset>>('/assets?take=100'),
+    ]);
 
   const host = incident.assets?.[0]?.asset;
   const primaryAlert = incident.alerts[0];
   const activity = bucketIncidentAlerts(incident.alerts);
+
+  const canWrite = hasRole(user, 'ANALYST');
+  const canDelete = hasRole(user, 'ADMIN');
+
+  const linkedAssetIds = new Set(
+    incident.assets?.map((link) => link.asset.id) ?? [],
+  );
+  const linkedAssets = incident.assets?.map((link) => link.asset) ?? [];
+  const availableAssets = allAssets.data.filter(
+    (asset) => !linkedAssetIds.has(asset.id),
+  );
 
   return (
     <div className="flex min-h-full flex-col">
@@ -195,9 +230,18 @@ export default async function IncidentDetailPage({
 
       <div className="grid flex-1 gap-px lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
         <section className="flex min-w-0 flex-col border-r">
-          <h2 className="text-muted-foreground border-b px-4 py-2 text-[10px] tracking-[0.16em] uppercase">
+          <h2 className="text-muted-foreground flex items-center border-b px-4 py-2 text-[10px] tracking-[0.16em] uppercase">
             Event timeline
             {events ? <span className="text-primary ml-2">{events.length}</span> : null}
+
+            {canWrite ? (
+              <Button asChild size="sm" variant="ghost" className="ml-auto h-6 px-2">
+                <Link href={`/alerts/new?incidentId=${incident.id}`}>
+                  <Plus className="size-3.5" aria-hidden />
+                  Log alert
+                </Link>
+              </Button>
+            ) : null}
           </h2>
 
           {events ? (
@@ -220,6 +264,30 @@ export default async function IncidentDetailPage({
           )}
         </aside>
       </div>
+
+      <AssetLinkSection
+        incidentId={incident.id}
+        linked={linkedAssets}
+        available={availableAssets}
+        canWrite={canWrite}
+      />
+
+      <EvidenceSection
+        incidentId={incident.id}
+        evidence={incident.evidence}
+        canWrite={canWrite}
+        canDelete={canDelete}
+      />
+
+      {investigationId ? (
+        <FindingsSection
+          investigationId={investigationId}
+          incidentId={incident.id}
+          findings={findings ?? []}
+          canWrite={canWrite}
+          canDelete={canDelete}
+        />
+      ) : null}
     </div>
   );
 }

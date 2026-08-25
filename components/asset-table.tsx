@@ -1,3 +1,5 @@
+import { deleteAsset } from '@/app/actions/assets';
+import { DeleteButton } from '@/components/delete-button';
 import { cn } from '@/lib/utils';
 import type { Asset, AssetStatus } from '@/lib/types';
 
@@ -24,7 +26,13 @@ function AssetStatusBadge({ status }: { status: AssetStatus }) {
   );
 }
 
-export function AssetTable({ assets }: { assets: Asset[] }) {
+export function AssetTable({
+  assets,
+  canDelete = false,
+}: {
+  assets: Asset[];
+  canDelete?: boolean;
+}) {
   if (assets.length === 0) {
     return (
       <div className="text-muted-foreground px-4 py-10 text-center text-sm">
@@ -41,6 +49,7 @@ export function AssetTable({ assets }: { assets: Asset[] }) {
           <th className="px-2 py-2 text-left font-normal">Asset</th>
           <th className="w-32 px-2 py-2 text-left font-normal">Type</th>
           <th className="w-40 px-4 py-2 text-right font-normal">IP address</th>
+          {canDelete ? <th className="w-20 px-2 py-2" /> : null}
         </tr>
       </thead>
 
@@ -67,6 +76,12 @@ export function AssetTable({ assets }: { assets: Asset[] }) {
             <td className="text-muted-foreground px-4 py-2.5 text-right align-top text-[11px] tabular-nums">
               {asset.ipAddress ?? '—'}
             </td>
+
+            {canDelete ? (
+              <td className="px-2 py-2.5 text-right align-top">
+                <DeleteButton action={deleteAsset.bind(null, asset.id)} />
+              </td>
+            ) : null}
           </tr>
         ))}
       </tbody>

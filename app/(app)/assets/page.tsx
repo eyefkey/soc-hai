@@ -1,9 +1,18 @@
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
+
 import { AssetTable } from '@/components/asset-table';
 import { FilterPills } from '@/components/filter-pills';
 import { Pagination } from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { requireUser } from '@/lib/dal';
-import type { Asset, AssetStatus, Paginated } from '@/lib/types';
+import {
+  hasRole,
+  type Asset,
+  type AssetStatus,
+  type Paginated,
+} from '@/lib/types';
 
 export const metadata = {
   title: 'Assets — SOC',
@@ -26,7 +35,7 @@ export default async function AssetsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireUser();
+  const user = await requireUser();
 
   const params = await searchParams;
   const skip = Number(params.skip ?? 0) || 0;
@@ -44,7 +53,16 @@ export default async function AssetsPage({
           <span className="text-primary ml-2">{assets.meta.total}</span>
         </h1>
 
-        <div className="ml-auto">
+        {hasRole(user, 'ANALYST') ? (
+          <Button asChild size="sm" className="ml-auto">
+            <Link href="/assets/new">
+              <Plus className="size-3.5" aria-hidden />
+              New asset
+            </Link>
+          </Button>
+        ) : null}
+
+        <div className="flex w-full flex-wrap items-center justify-end gap-4">
           <FilterPills
             param="status"
             active={params.status}
@@ -55,7 +73,7 @@ export default async function AssetsPage({
         </div>
       </header>
 
-      <AssetTable assets={assets.data} />
+      <AssetTable assets={assets.data} canDelete={hasRole(user, 'ADMIN')} />
 
       <Pagination
         total={assets.meta.total}

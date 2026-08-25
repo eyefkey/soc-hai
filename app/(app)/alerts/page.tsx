@@ -1,9 +1,19 @@
+import Link from 'next/link';
+import { Plus } from 'lucide-react';
+
 import { AlertTable } from '@/components/alert-table';
 import { FilterPills } from '@/components/filter-pills';
 import { Pagination } from '@/components/pagination';
+import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { requireUser } from '@/lib/dal';
-import type { Alert, Incident, Paginated, Severity } from '@/lib/types';
+import {
+  hasRole,
+  type Alert,
+  type Incident,
+  type Paginated,
+  type Severity,
+} from '@/lib/types';
 
 export const metadata = {
   title: 'Alerts — SOC',
@@ -19,7 +29,7 @@ export default async function AlertsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireUser();
+  const user = await requireUser();
 
   const params = await searchParams;
   const skip = Number(params.skip ?? 0) || 0;
@@ -39,7 +49,16 @@ export default async function AlertsPage({
           <span className="text-primary ml-2">{alerts.meta.total}</span>
         </h1>
 
-        <div className="ml-auto">
+        {hasRole(user, 'ANALYST') ? (
+          <Button asChild size="sm" className="ml-auto">
+            <Link href="/alerts/new">
+              <Plus className="size-3.5" aria-hidden />
+              New alert
+            </Link>
+          </Button>
+        ) : null}
+
+        <div className="flex w-full flex-wrap items-center justify-end gap-4">
           <FilterPills
             param="severity"
             active={params.severity}
@@ -51,7 +70,7 @@ export default async function AlertsPage({
         </div>
       </header>
 
-      <AlertTable alerts={alerts.data} />
+      <AlertTable alerts={alerts.data} canDelete={hasRole(user, 'ADMIN')} />
 
       <Pagination
         total={alerts.meta.total}
