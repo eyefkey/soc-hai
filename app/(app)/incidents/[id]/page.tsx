@@ -6,6 +6,7 @@ import { ActivityChart } from '@/components/activity-chart';
 import { AssetLinkSection } from '@/components/asset-link-section';
 import { AutomatedAnalysis } from '@/components/automated-analysis';
 import { Button } from '@/components/ui/button';
+import { ConclusionSection } from '@/components/conclusion-section';
 import { EvidenceSection } from '@/components/evidence-section';
 import { EventTimeline } from '@/components/event-timeline';
 import { FindingsSection } from '@/components/findings-section';
@@ -264,6 +265,15 @@ export default async function IncidentDetailPage({
           )}
         </aside>
       </div>
+
+      {investigationId ? (
+        <ConclusionSection
+          investigationId={investigationId}
+          incidentId={incident.id}
+          conclusion={incident.investigation?.conclusion ?? null}
+          canWrite={canWrite}
+        />
+      ) : null}
 
       <AssetLinkSection
         incidentId={incident.id}

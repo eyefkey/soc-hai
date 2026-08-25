@@ -1,8 +1,10 @@
-import { ShieldOff } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, ShieldOff } from 'lucide-react';
 
 import { FilterPills } from '@/components/filter-pills';
 import { Pagination } from '@/components/pagination';
 import { UserTable } from '@/components/user-table';
+import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { requireUser } from '@/lib/dal';
 import { hasRole, type Paginated, type User, type UserRole } from '@/lib/types';
@@ -58,7 +60,14 @@ export default async function UsersPage({
           <span className="text-primary ml-2">{users.meta.total}</span>
         </h1>
 
-        <div className="ml-auto">
+        <Button asChild size="sm" className="ml-auto">
+          <Link href="/users/new">
+            <Plus className="size-3.5" aria-hidden />
+            New user
+          </Link>
+        </Button>
+
+        <div className="flex w-full flex-wrap items-center justify-end gap-4">
           <FilterPills
             param="role"
             active={params.role}

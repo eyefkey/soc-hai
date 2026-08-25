@@ -155,6 +155,33 @@ export async function assignToMe(incidentId: string): Promise<ActionResult> {
 }
 
 /*
+ * investigationId and incidentId are bound ahead of time
+ * (saveConclusion.bind(null, investigationId, incidentId)), leaving a
+ * (state, formData) shape for useActionState — the same pattern used for
+ * attachAsset and createEvidence.
+ */
+export async function saveConclusion(
+  investigationId: string,
+  incidentId: string,
+  _previous: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const conclusion = String(formData.get('conclusion') ?? '').trim();
+
+  try {
+    await api(`/investigations/${investigationId}`, {
+      method: 'PATCH',
+      body: { conclusion },
+    });
+  } catch (error) {
+    return toActionResult(error);
+  }
+
+  revalidatePath(`/incidents/${incidentId}`);
+  return {};
+}
+
+/*
  * Closes the incident and, if an investigation is attached, resolves it
  * too — an incident and an orphaned open investigation would disagree
  * about whether the case is still active.
