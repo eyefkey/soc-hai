@@ -2,7 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { tacticLabel, type MitreTactic } from '@/lib/types';
+
+/*
+ * Radix's Select rejects an empty-string item value (it's reserved to mean
+ * "no selection"), so "All tactics" needs its own sentinel that onChange
+ * translates back into "delete the tactic param" below.
+ */
+const ALL = 'all';
 
 const TACTICS: MitreTactic[] = [
   'RECONNAISSANCE',
@@ -47,7 +61,7 @@ export function TacticSelect({
       ),
     );
 
-    if (value) {
+    if (value !== ALL) {
       params.set('tactic', value);
     } else {
       params.delete('tactic');
@@ -58,17 +72,21 @@ export function TacticSelect({
   };
 
   return (
-    <select
-      value={active ?? ''}
-      onChange={(event) => onChange(event.target.value)}
-      className="border-input bg-transparent h-7 rounded-md border px-2 text-[10px] font-semibold tracking-[0.08em] uppercase"
-    >
-      <option value="">All tactics</option>
-      {TACTICS.map((tactic) => (
-        <option key={tactic} value={tactic}>
-          {tacticLabel(tactic)}
-        </option>
-      ))}
-    </select>
+    <Select value={active ?? ALL} onValueChange={onChange}>
+      <SelectTrigger
+        size="sm"
+        className="h-7 px-2 text-[10px] font-semibold tracking-[0.08em] uppercase"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>All tactics</SelectItem>
+        {TACTICS.map((tactic) => (
+          <SelectItem key={tactic} value={tactic}>
+            {tacticLabel(tactic)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
